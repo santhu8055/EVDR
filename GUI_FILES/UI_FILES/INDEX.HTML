@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SERVO EVDR - OPERATOR CONSOLE</title>
+  <link rel="icon" type="image/png" href="./ASSETS/ICONS/APP_ICON.PNG">
+  <link rel="stylesheet" href="./styles.css?v=20260526o">
+</head>
+<body>
+  <div class="screen">
+    <header class="titlebar">
+      <div class="title-left">
+        <h1>SERVO EVDR - OPERATOR CONSOLE</h1>
+      </div>
+      <div class="title-right">
+        <div class="brand">SERVOCONTROLS</div>
+      </div>
+    </header>
+
+    <section class="top-strip">
+      <div class="tabs">
+        <button id="tabFiles" class="tab active" type="button">Files</button>
+        <button id="tabSettings" class="tab" type="button">Settings</button>
+      </div>
+      <div class="strip-status">
+        <span id="topConnState" class="connected-pill offline">
+          <span class="dot"></span>
+          Disconnected
+        </span>
+        <span id="topDeviceId" class="device-pill">Device ID: -</span>
+      </div>
+    </section>
+
+    <div id="tabActions" class="hidden-actions" aria-hidden="true">
+      <button id="menuNewFile" data-group="files">New File</button>
+      <button id="menuOpenFile" data-group="files">Open File</button>
+      <button id="menuSaveFile" data-group="files">Save</button>
+      <button id="menuTheme" data-group="settings">Theme</button>
+      <button id="menuAdvanced" data-group="settings">Advanced Parameters</button>
+      <button id="menuDeveloper" data-group="settings">Developer Mode</button>
+      <button id="menuFirmware" data-group="settings">Firmware Update</button>
+      <button id="menuEventLog" data-group="settings">Event & Communication Log</button>
+    </div>
+
+    <main class="layout">
+      <section class="left-col">
+        <section class="panel comm">
+          <div class="panel-title">
+            <span class="panel-icon icon-comm" aria-hidden="true"></span>
+            <span>COMMUNICATION INTERFACE</span>
+            <span class="title-rule" aria-hidden="true"></span>
+          </div>
+          <div class="comm-row">
+            <label for="transportSelect">Interface Type</label>
+            <select id="transportSelect">
+              <option value="UART">Serial</option>
+              <option value="BLE">Bluetooth</option>
+            </select>
+
+            <label id="endpointLabel" for="endpointSelect">Serial Port</label>
+            <select id="endpointSelect"></select>
+
+            <button id="btnRefresh" class="btn btn-dark icon-btn" title="Refresh"><span class="btn-icon icon-refresh"></span></button>
+            <button id="btnConnect" class="btn btn-blue"><span class="btn-icon icon-switch-open"></span>Connect</button>
+            <button id="btnReadToggle" class="btn btn-green"><span class="btn-icon icon-play"></span>Start Monitoring</button>
+          </div>
+          <div class="comm-status" aria-hidden="true">
+            <span id="connState" class="pill">Disconnected</span>
+            <span id="panelState" class="pill">IDLE</span>
+            <span id="errorText" class="muted"></span>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-title">
+            <span class="panel-icon icon-wave" aria-hidden="true"></span>
+            <span>REAL-TIME TELEMETRY</span>
+            <span class="title-rule" aria-hidden="true"></span>
+          </div>
+          <div class="telemetry-grid">
+            <article class="tele-card">
+              <div class="tele-head">
+                <span class="tele-icon in" aria-hidden="true"></span>
+                <h3 id="teleInputTitle">INPUT SIGNAL (V)</h3>
+              </div>
+              <div id="teleInput" class="tele-value">--</div>
+              <p id="teleInputHint">Input Voltage</p>
+            </article>
+            <article class="tele-card">
+              <div class="tele-head">
+                <span class="tele-icon out" aria-hidden="true"></span>
+                <h3>MEASURED OUTPUT</h3>
+              </div>
+              <div id="teleOutput" class="tele-value">--</div>
+              <p>Measured Current</p>
+            </article>
+            <article id="limitStatusCard" class="tele-card">
+              <div class="tele-head">
+                <span class="tele-icon sat" aria-hidden="true"></span>
+                <h3>LIMIT STATUS</h3>
+              </div>
+              <div id="teleSat" class="tele-value">--</div>
+              <p>Limit Condition</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="configPanel" class="panel">
+          <div class="panel-title">
+            <span class="panel-icon icon-gear" aria-hidden="true"></span>
+            <span>CONFIGURATION PARAMETERS</span>
+            <span class="title-rule" aria-hidden="true"></span>
+          </div>
+          <div class="cfg-grid">
+            <div class="sub-panel">
+              <h3>INPUT PARAMETERS</h3>
+              <div class="form-grid">
+                <div class="form-row form-row-single">
+                  <label for="cfgMode">Mode Selection</label>
+                  <select id="cfgMode">
+                    <option>Resistance (0-10)</option>
+                    <option>0-5V</option>
+                    <option selected>0-10V</option>
+                    <option>0-20mA</option>
+                  </select>
+                </div>
+
+                <div class="form-row form-row-single">
+                  <label id="cfgInMinLabel" for="cfgInMin">Input Minimum (V)</label>
+                  <input id="cfgInMin" type="text" value="0.00">
+                </div>
+
+                <div class="form-row form-row-single">
+                  <label id="cfgInMaxLabel" for="cfgInMax">Input Maximum (V)</label>
+                  <input id="cfgInMax" type="text" value="10.00">
+                </div>
+
+                <div class="form-row form-row-single">
+                  <label id="cfgOutMinLabel" for="cfgOutMin">Output Minimum (mA)</label>
+                  <input id="cfgOutMin" type="text" value="0.00">
+                </div>
+
+                <div class="form-row form-row-single">
+                  <label id="cfgOutMaxLabel" for="cfgOutMax">Output Maximum (mA)</label>
+                  <input id="cfgOutMax" type="text" value="2000.00">
+                </div>
+
+                <input id="cfgUnit" type="hidden" value="mA">
+              </div>
+            </div>
+
+            <div class="sub-panel">
+              <div class="row-between">
+                <h3>SETPOINT TABLE <span class="sub-note">(Up to 10 setpoints)</span></h3>
+                <button id="btnAddPoint" class="btn btn-blue small"><span class="btn-icon icon-plus"></span>Add</button>
+              </div>
+              <div class="bp-head">
+                <span>Point</span><span id="bpInputHead">Input (V)</span><span></span><span id="bpOutputHead">Output (mA)</span><span>Action</span>
+              </div>
+              <div class="bp-body">
+                <div id="bpEmpty" class="bp-empty">No setpoints added yet</div>
+                <div id="bpRows"></div>
+              </div>
+            </div>
+          </div>
+          <div class="actions-row cfg-panel-actions">
+            <button id="btnReadDevice" class="btn btn-blue"><span class="btn-icon icon-download"></span>Fetch Configuration</button>
+            <button id="btnApplyCfg" class="btn btn-green"><span class="btn-icon icon-check"></span>Apply Configuration</button>
+          </div>
+        </section>
+
+      </section>
+
+      <section class="right-col">
+        <section class="panel graph-panel">
+          <div class="row-between">
+            <div class="panel-title">
+              <span class="panel-icon icon-plot" aria-hidden="true"></span>
+              <span>REAL-TIME GRAPH</span>
+              <span class="title-rule" aria-hidden="true"></span>
+            </div>
+          </div>
+          <div class="graph-meta">
+            <span id="metaVolt">Input Signal: --</span>
+            <span id="metaCurrent">Measured Output: --</span>
+            <button id="btnResetPlot" class="btn btn-dark small graph-reset-btn" type="button">Reset Plot</button>
+          </div>
+          <p class="muted linearity-title">INPUT-OUTPUT LINEARITY</p>
+          <div class="graph-surface">
+            <canvas id="linearityCanvas" height="170"></canvas>
+          </div>
+
+          <p class="muted trend-title">REAL-TIME TELEMETRY TREND</p>
+          <div class="graph-surface">
+            <canvas id="trendCanvas" height="170"></canvas>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="footer-bar">
+      <div>SERVO EVDR v2.0.0</div>
+      <div class="footer-mid">
+        <span id="footerPort">Disconnected</span>
+        <span id="footerBaud"></span>
+      </div>
+      <div id="footerTime">09:44:41 AM</div>
+    </footer>
+  </div>
+
+  <dialog id="advancedDialog" class="adv-dialog">
+    <form method="dialog">
+      <h2>Advanced Parameters</h2>
+      <div class="adv-grid">
+        <label for="advKp">Kp</label><input id="advKp" type="text" value="0.15">
+        <label for="advKi">Ki</label><input id="advKi" type="text" value="0.00005">
+        <label for="advDitherFreq">Dither Freq</label><input id="advDitherFreq" type="text" value="150">
+        <label for="advDitherAmp">Dither Amp</label><input id="advDitherAmp" type="text" value="0.05">
+        <label for="advPwmFreq">PWM Freq</label><input id="advPwmFreq" type="text" value="2000">
+        <label for="advDitherEnable">Dither Enable</label>
+        <div id="advDitherToggleWrap" class="toggle-wrap">
+          <input id="advDitherEnable" class="toggle-input" type="checkbox" checked>
+          <label for="advDitherEnable" class="toggle-ui" aria-label="Dither Enable"></label>
+          <span id="advDitherState" class="toggle-state">ON</span>
+        </div>
+      </div>
+      <div class="actions-row">
+        <button id="btnApplyAdv" type="button" class="btn btn-blue">Apply Advanced</button>
+        <button type="submit" class="btn btn-dark">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="themeDialog" class="adv-dialog">
+    <form method="dialog">
+      <h2>Theme</h2>
+      <p class="muted dialog-note">Select the UI appearance mode.</p>
+      <div class="adv-grid theme-grid">
+        <label for="themeSelect">Theme</label>
+        <select id="themeSelect">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+      </div>
+      <div class="actions-row">
+        <button id="btnThemeApply" type="button" class="btn btn-blue">Apply Theme</button>
+        <button type="submit" class="btn btn-dark">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="developerDialog" class="adv-dialog wide-dialog developer-dialog">
+    <form method="dialog">
+      <h2>Developer Mode</h2>
+      <p class="muted dialog-note">Calibration is loaded from device after login. Edit values and save if needed.</p>
+      <div class="adv-grid dev-grid">
+        <label for="calMaScale">MA_SCALE_FACTOR_4_20MA</label><input id="calMaScale" type="text" placeholder="1.0">
+        <label for="calResistanceScale">RESISTANCE_SCALE_FACTOR</label><input id="calResistanceScale" type="text" placeholder="1.0">
+        <label for="calVoltageScale">VOLTAGE_SCALE_FACTOR</label><input id="calVoltageScale" type="text" placeholder="1.0">
+        <label for="calFbToCurrent">FB_TO_CURRENT_FACTOR</label><input id="calFbToCurrent" type="text" placeholder="1.0">
+        <label for="calFbOffset">FB_OFFSET</label><input id="calFbOffset" type="text" placeholder="0.0">
+      </div>
+      <p id="devStatusText" class="muted dialog-status">Session locked</p>
+      <div class="actions-row">
+        <button id="btnCalLoad" type="button" class="btn btn-dark">Load Calibration</button>
+        <button id="btnCalSave" type="button" class="btn btn-green">Save Calibration</button>
+        <button type="submit" class="btn btn-dark">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="firmwareDialog" class="adv-dialog wide-dialog">
+    <form method="dialog">
+      <h2>Firmware Update</h2>
+      <p class="muted dialog-note">BLE only. Password is requested when opening Firmware Update.</p>
+      <div class="adv-grid firmware-grid">
+        <label for="fwFilePath">Firmware BIN</label>
+        <div class="file-picker-row">
+          <input id="fwFilePath" type="text" readonly placeholder="No file selected">
+          <button id="btnPickFirmware" type="button" class="btn btn-dark small">Browse</button>
+        </div>
+        <label for="fwFileSize">File Size</label><input id="fwFileSize" type="text" readonly value="-">
+        <label for="fwProgressTrack">Upload Progress</label>
+        <div class="fw-progress-wrap">
+          <div
+            id="fwProgressTrack"
+            class="fw-progress-track"
+            role="progressbar"
+            aria-label="Firmware upload progress"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <div id="fwProgressFill" class="fw-progress-fill"></div>
+          </div>
+          <span id="fwProgressText" class="fw-progress-text">0%</span>
+        </div>
+      </div>
+      <p id="fwStatusText" class="muted dialog-status">Ready</p>
+      <div class="actions-row">
+        <button id="btnFirmwareUpload" type="button" class="btn btn-green">Upload Firmware</button>
+        <button id="btnFirmwareCancel" type="button" class="btn btn-dark">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="eventLogDialog" class="adv-dialog wide-dialog">
+    <form method="dialog">
+      <div class="row-between">
+        <h2>Event & Communication Log</h2>
+        <button id="btnClearLog" type="button" class="btn btn-dark small"><span class="btn-icon icon-trash"></span>Clear Log</button>
+      </div>
+      <div id="logBox" class="log-box"></div>
+      <div class="actions-row">
+        <button type="submit" class="btn btn-dark">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="passwordPromptDialog" class="adv-dialog password-prompt-dialog">
+    <form method="dialog">
+      <h2>Security Check</h2>
+      <p id="passwordPromptLabel" class="muted dialog-note">Enter password</p>
+      <div class="adv-grid password-prompt-grid">
+        <label for="passwordPromptInput">Password</label>
+        <input id="passwordPromptInput" type="password" autocomplete="off" placeholder="Enter password">
+      </div>
+      <p id="passwordPromptError" class="muted dialog-status"></p>
+      <div class="actions-row">
+        <button id="btnPasswordPromptCancel" type="button" class="btn btn-dark">Cancel</button>
+        <button id="btnPasswordPromptOk" type="button" class="btn btn-blue">OK</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="warningDialog" class="adv-dialog warning-dialog">
+    <form method="dialog">
+      <div class="warning-head">
+        <span id="warningDialogIcon" class="warning-icon warning" aria-hidden="true"></span>
+        <h2 id="warningDialogTitle">Warning</h2>
+      </div>
+      <p id="warningDialogMessage" class="warning-message">-</p>
+      <div class="actions-row">
+        <button id="btnWarningDialogOk" type="button" class="btn btn-warn">OK</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="confirmDialog" class="adv-dialog warning-dialog">
+    <form method="dialog">
+      <div class="warning-head">
+        <span class="warning-icon warning" aria-hidden="true"></span>
+        <h2 id="confirmDialogTitle">Warning</h2>
+      </div>
+      <p id="confirmDialogMessage" class="warning-message">-</p>
+      <div class="actions-row">
+        <button id="btnConfirmDialogNo" type="button" class="btn btn-dark">No</button>
+        <button id="btnConfirmDialogYes" type="button" class="btn btn-warn">Yes</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="./app.js?v=20260529a"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
