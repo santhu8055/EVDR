@@ -1067,6 +1067,9 @@ class SerialRuntime:
                 if "sat" in parsed:
                     self.telemetry["sat"] = self._format_sat(parsed["sat"])
                     updated = True
+                if "pwm_sat" in parsed:
+                    self.telemetry["pwm_sat"] = self._format_sat(parsed["pwm_sat"])
+                    updated = True
             if updated:
                 self.telemetry["updated_at"] = time.time()
 
@@ -2645,7 +2648,7 @@ class WebApi:
             self._send_fw_abort_best_effort()
             return self._firmware_cancelled_result()
 
-        fast_protocol = "V1.9_BLE_OTA_FAST" in begin_line.upper()
+        fast_protocol = "V1.0_BLE_OTA_FAST" in begin_line.upper()
         self.runtime._push_event("SYS", f"FW transfer mode: {'FAST' if fast_protocol else 'SAFE'}")
         transfer = self._transfer_firmware_chunks(image_bytes, fast_protocol=fast_protocol)
         if transfer.get("cancelled"):
@@ -2713,9 +2716,9 @@ def main() -> None:
         title="SERVO EVDR APPLICATION",
         url=index_path.resolve(strict=False).as_uri(),
         js_api=api,
-        width=1360,
-        height=900,
-        min_size=(1180, 760),
+        width=1560,
+        height=820,
+        resizable=False,
     )
     if hasattr(window, "events") and hasattr(window.events, "closed"):
         window.events.closed += lambda: api.close_app()

@@ -32,6 +32,7 @@ html,
 body {
   width: 100%;
   height: 100%;
+  overflow: hidden;
   margin: 0;
   padding: 0;
   color: var(--text);
@@ -288,19 +289,19 @@ body.theme-light .dot {
 
 .screen {
   position: relative;
-  min-height: 100%;
-  min-height: 100dvh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 8px 10px 8px;
+  gap: 8px;
+  padding: 7px 10px;
   border: 1px solid var(--line-soft);
   border-radius: 10px;
-  overflow: clip;
+  overflow: hidden;
 }
 
 .titlebar {
-  height: 46px;
+  height: 44px;
+  flex: 0 0 44px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -382,7 +383,8 @@ body.theme-light .dot {
 }
 
 .top-strip {
-  min-height: 48px;
+  height: 44px;
+  flex: 0 0 44px;
   border: 1px solid var(--line-soft);
   border-radius: 7px;
   background:
@@ -514,22 +516,24 @@ body.theme-light .dot {
 }
 
 .layout {
-  flex: 0 0 auto;
+  flex: 1;
   display: grid;
   grid-template-columns: minmax(0, 62%) minmax(0, 38%);
-  gap: 10px;
+  gap: 8px;
   min-height: 0;
+  overflow: hidden;
   align-items: stretch;
 }
 
 .left-col,
 .right-col {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   align-content: stretch;
   min-height: 0;
   min-width: 0;
   height: 100%;
+  overflow: hidden;
 }
 
 .left-col {
@@ -549,6 +553,8 @@ body.theme-light .dot {
   padding: 10px;
   box-shadow: inset 0 0 0 1px rgba(88, 150, 220, 0.05);
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 #configPanel {
@@ -560,26 +566,30 @@ body.theme-light .dot {
 
 .graph-panel {
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 #configPanel .cfg-grid {
-  flex: 1 1 auto;
+  flex: 1;
   min-height: 0;
+  height: 100%;
 }
 
 #configPanel .cfg-panel-actions {
-  margin-top: 12px;
+  margin-top: 6px;
+  flex: 0 0 auto;
 }
 
 .panel-title {
   margin: 0 0 8px;
-  font-size: 0.96rem;
+  font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.01em;
   display: flex;
   align-items: center;
   gap: 9px;
-  flex: 1;
+  flex: 0 0 auto;
   min-width: 0;
 }
 
@@ -1039,7 +1049,7 @@ input[readonly] {
   border: 1px solid #2a4563;
   border-radius: 9px;
   padding: 10px;
-  min-height: 118px;
+  min-height: 80px;
 }
 
 .tele-head {
@@ -1126,6 +1136,10 @@ input[readonly] {
     inset 0 0 14px rgba(255, 76, 76, 0.12);
 }
 
+.tele-card.limit-alert .tele-value {
+  color: #ff4c4c;
+}
+
 .tele-card.limit-alert::after {
   content: none;
 }
@@ -1134,7 +1148,9 @@ input[readonly] {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: stretch;
-  gap: 12px;
+  gap: 10px;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .cfg-grid > .sub-panel {
@@ -1172,13 +1188,15 @@ input[readonly] {
   background: linear-gradient(180deg, #122338, #0d1c2c);
   border: 1px solid #2a4563;
   border-radius: 9px;
-  padding: 11px;
+  padding: 10px;
   min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .sub-panel h3 {
   margin: 0 0 8px;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
 }
 
 .sub-panel > .row-between {
@@ -1204,7 +1222,7 @@ input[readonly] {
 .form-grid {
   display: flex;
   flex-direction: column;
-  gap: 11px;
+  gap: 9px;
 }
 
 .form-row {
@@ -1254,8 +1272,8 @@ body.theme-light .bp-head {
 }
 
 .bp-body {
-  min-height: 58px;
-  max-height: 168px;
+  min-height: 44px;
+  max-height: 140px;
   flex: 0 0 auto;
   overflow-y: auto;
   padding-right: 2px;
@@ -1264,12 +1282,12 @@ body.theme-light .bp-head {
 
 .bp-body.has-rows {
   min-height: 0;
-  max-height: 168px;
+  max-height: 140px;
 }
 
 .bp-empty {
   height: auto;
-  min-height: 48px;
+  min-height: 40px;
   border: 1px solid #213e5a;
   border-radius: 7px;
   display: flex;
@@ -1315,7 +1333,7 @@ body.theme-light .bp-head {
 }
 
 .actions-row {
-  margin-top: 8px;
+  margin-top: 6px;
   display: flex;
   justify-content: flex-end;
   gap: 8px;
@@ -1330,8 +1348,8 @@ body.theme-light .bp-head {
 }
 
 .graph-panel {
-  min-height: auto;
-  padding: 12px;
+  min-height: 0;
+  padding: 10px;
   border-color: #2a5072;
   border-radius: 11px;
   background:
@@ -1342,8 +1360,8 @@ body.theme-light .bp-head {
     0 10px 22px rgba(0, 0, 0, 0.23);
   display: grid;
   grid-template-rows: auto auto auto minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: 10px;
-  min-height: 0;
+  gap: 8px;
+  overflow: hidden;
 }
 
 .graph-panel .row-between {
@@ -1439,10 +1457,10 @@ body.theme-light .bp-head {
 .graph-meta {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+  gap: 6px;
   color: #adc4db;
   font-size: 0.86rem;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   align-items: stretch;
 }
 
@@ -1451,7 +1469,7 @@ body.theme-light .bp-head {
 }
 
 .graph-meta span {
-  min-height: 34px;
+  min-height: 32px;
   display: inline-flex;
   align-items: center;
   white-space: nowrap;
@@ -1476,8 +1494,8 @@ body.theme-light .bp-head {
 
 .graph-reset-btn {
   width: 100%;
-  min-height: 34px;
-  font-size: 0.9rem;
+  min-height: 32px;
+  font-size: 0.89rem;
 }
 
 #metaVolt {
@@ -1523,6 +1541,7 @@ body.theme-light .bp-head {
   height: 100%;
   display: flex;
   align-items: stretch;
+  flex: 1;
 }
 
 canvas {
@@ -1542,7 +1561,7 @@ canvas {
 #linearityCanvas,
 #trendCanvas {
   height: 100%;
-  min-height: 220px;
+  min-height: 80px;
 }
 
 .linearity-title,
@@ -1592,10 +1611,10 @@ body.theme-light .trend-title {
 }
 
 .footer-bar {
-  height: 36px;
+  height: 30px;
+  flex: 0 0 30px;
   margin-top: 0;
   border: 1px solid var(--line-soft);
-  border-bottom: 1px solid var(--line-soft);
   border-radius: 7px;
   background:
     linear-gradient(90deg, rgba(34, 66, 104, 0.3), rgba(12, 25, 42, 0.78) 35%, rgba(10, 20, 34, 0.9)),
@@ -1605,7 +1624,7 @@ body.theme-light .trend-title {
   justify-content: space-between;
   padding: 0 10px;
   color: #b8cce0;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
 }
 
 .footer-mid {
@@ -2002,7 +2021,7 @@ body.theme-dark .tele-card.limit-alert {
     inset 0 0 12px rgba(236, 89, 89, 0.12);
 }
 
-@media (max-width: 1500px) {
+@media (max-width: 1200px) {
   .layout {
     grid-template-columns: 1fr;
   }

@@ -117,6 +117,7 @@ const el = {
   topDeviceId: document.getElementById("topDeviceId"),
 
   teleInput: document.getElementById("teleInput"),
+  teleInputCard: document.getElementById("teleInputCard"),
   teleInputTitle: document.getElementById("teleInputTitle"),
   teleInputHint: document.getElementById("teleInputHint"),
   teleOutput: document.getElementById("teleOutput"),
@@ -1430,13 +1431,23 @@ function updateTelemetryUi(telemetry) {
   const inputRaw = telemetry?.input ?? "-";
   const outputRaw = telemetry?.output ?? "-";
   const outputTxt = formatMeasuredOutputValue(outputRaw, getMeasuredOutputUnit());
-  const satTxt = String(telemetry?.sat ?? "-");
+  
+  const satValue = String(telemetry?.sat ?? "-");
+  const pwmSatValue = String(telemetry?.pwm_sat ?? "-");
+  const isInputSat = isLimitStatusOn(satValue);
+  const isPwmSat = isLimitStatusOn(pwmSatValue);
+  
   const inputInfo = updateInputSignalCardPresentation();
   const inputTxt = formatInputSignalValue(inputRaw, inputInfo.unit);
   el.teleInput.textContent = inputTxt;
   el.teleOutput.textContent = outputTxt;
-  el.teleSat.textContent = satTxt;
-  setLimitStatusAlert(satTxt);
+  el.teleSat.textContent = isPwmSat ? "ON" : "OFF";
+  
+  if (el.teleInputCard) {
+    el.teleInputCard.classList.toggle("limit-alert", isInputSat);
+  }
+  setLimitStatusAlert(isPwmSat);
+  
   updateGraphMeta(inputTxt, outputTxt);
 
   const x = parseNum(inputRaw);
@@ -1472,10 +1483,15 @@ function isLimitStatusOn(value) {
   return /\bon\b/.test(txt) || /\bsat\b/.test(txt);
 }
 
-function setLimitStatusAlert(statusValue) {
+function setLimitStatusAlert(isPwmSatActive) {
   const card = el.limitStatusCard || el.teleSat?.closest(".tele-card");
   if (!card) return;
-  card.classList.toggle("limit-alert", isLimitStatusOn(statusValue));
+  
+  if (typeof isPwmSatActive === "boolean") {
+    card.classList.toggle("limit-alert", isPwmSatActive);
+  } else {
+    card.classList.toggle("limit-alert", isLimitStatusOn(isPwmSatActive));
+  }
 }
 
 function formatGraphMetaValue(value) {
@@ -2047,9 +2063,92 @@ function drawLinearityCanvas() {
     }
   }
 
-  ctx.save();
-  ctx.fillStyle = uiColors.axisText;
-  ctx.font = "11px Consolas";
+  // ── LIVE POSITION GLOW DOT (smooth red pulse) ────────────────────────
+  if (state.lastPoint && state.lastPoint.x !== null && state.lastPoint.y !== null) {
+    const lx = state.lastPoint.x;
+    const ly = state.lastPoint.y;
+    if (lx >= xMin && lx <= xMax && ly >= yMin && ly <= yMax) {
+      const gpx = sx(lx);
+      const gpy = sy(ly);
+
+      // Smooth sine-wave pulse: oscillates between 0 and 1
+      const pulse = (Math.sin(performance.now() / 700) + 1) / 2;
+
+      // Outer glow — subtle, pulses between 10 and 18px
+      const outerR = 10 + pulse * 8;
+      const outerOpacity = 0.08 + pulse * 0.14;
+      const outerGlow = ctx.createRadialGradient(gpx, gpy, 0, gpx, gpy, outerR);
+      outerGlow.addColorStop(0, `rgba(232, 80, 80, ${outerOpacity})`);
+      outerGlow.addColorStop(0.5, `rgba(232, 80, 80, ${outerOpacity * 0.4})`);
+      outerGlow.addColorStop(1, "rgba(232, 80, 80, 0)");
+      ctx.beginPath();
+      ctx.arc(gpx, gpy, outerR, 0, Math.PI * 2);
+      ctx.fillStyle = outerGlow;
+      ctx.fill();
+
+      // Middle glow — pulses between 4 and 7px
+      const midR = 4 + pulse * 3;
+      const midGlow = ctx.createRadialGradient(gpx, gpy, 0, gpx, gpy, midR);
+      midGlow.addColorStop(0, `rgba(232, 80, 80, ${0.3 + pulse * 0.2})`);
+      midGlow.addColorStop(1, "rgba(232, 80, 80, 0)");
+      ctx.beginPath();
+      ctx.arc(gpx, gpy, midR, 0, Math.PI * 2);
+      ctx.fillStyle = midGlow;
+      ctx.fill();
+
+      // Solid red core dot
+      ctx.beginPath();
+      ctx.arc(gpx, gpy, 4, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(240, 100, 100, ${0.75 + pulse * 0.25})`;
+      ctx.shadowColor = `rgba(232, 80, 80, ${0.4 + pulse * 0.3})`;
+      ctx.shadowBlur = 4 + pulse * 6;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Red ring outline
+      ctx.beginPath();
+      ctx.arc(gpx, gpy, 4, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(232, 80, 80, ${0.5 + pulse * 0.3})`;
+      ctx.lineWidth = 1.2;
+      ctx.stroke();
+
+      // Label: only show when mouse is hovering near the dot
+      if (state.linearityHover) {
+        const dx = state.linearityHover.x - gpx;
+        const dy = state.linearityHover.y - gpy;
+        const distSq = dx * dx + dy * dy;
+        if (distSq <= 28 * 28) {
+          ctx.save();
+          ctx.font = "bold 10px Consolas";
+          const outputUnit = String(getMeasuredOutputUnit() || "mA").trim();
+          const inputUnit = String(getInputSignalModeInfo().unit || "").trim();
+          const labelText = `${lx.toFixed(2)}${inputUnit ? " " + inputUnit : ""} → ${ly.toFixed(1)} ${outputUnit}`;
+          const lw = ctx.measureText(labelText).width;
+          let lx2 = gpx + 10;
+          let ly2 = gpy - 18;
+          if (lx2 + lw + 10 > right) lx2 = gpx - lw - 14;
+          if (ly2 < top + 4) ly2 = gpy + 12;
+          ctx.fillStyle = "rgba(5, 18, 32, 0.88)";
+          ctx.strokeStyle = "rgba(64, 220, 255, 0.7)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(lx2 - 4, ly2 - 3, lw + 8, 17, 4);
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = "#40dcff";
+          ctx.textAlign = "left";
+          ctx.textBaseline = "top";
+          ctx.fillText(labelText, lx2, ly2);
+          ctx.restore();
+        }
+      }
+
+      // Keep re-drawing to animate the pulse
+      scheduleDrawGraphs();
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────
+
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
   ctx.fillText(getGraphInputAxisLabel(), (left + right) / 2, h - 4);

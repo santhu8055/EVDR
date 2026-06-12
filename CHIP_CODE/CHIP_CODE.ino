@@ -1,3 +1,46 @@
+/**
+ * ============================================================================
+ * @file      CHIP_CODE.ino
+ * @project   SERVO EVDR APPLICATION (Electronic Valve Driver Controller)
+ * @target    ESP32 (ESP-WROOM-32)
+ * @version   v1.0 (FINAL_BLE_UART_CODE_v1.0_ble_ota_fast)
+ * @author    EVDR Development Team
+ * 
+ * @brief     Core Firmware for the SERVO EVDR Electronic Valve Driver.
+ *            This code is responsible for real-time hardware control, converting 
+ *            analog input signals into a precise, PID-controlled PWM output to 
+ *            drive hydraulic or pneumatic proportional valves.
+ * 
+ * ============================================================================
+ * 
+ * @architecture
+ * - Real-Time Control: Runs a fast, non-blocking PID control loop adjusting PWM duty cycle to hit current targets.
+ * - Multi-Interface: Accepts commands and streams telemetry simultaneously via Bluetooth Low Energy (BLE) and UART.
+ * - State Management: Saves configuration (CFG) and advanced parameters (ADV) to non-volatile flash memory (NVS) via the Preferences library.
+ * 
+ * @important_functionalities
+ * 1. PID Control & Dithering:
+ *    - Implements Proportional-Integral control for current stabilization.
+ *    - Adds a high-frequency sine wave (Dither) to the PWM signal to prevent valve stiction.
+ * 
+ * 2. Visual Indication (NeoPixel RGB LED on Pin 8):
+ *    - SOLID RED: Critical Warning - PWM Duty Cycle has hit maximum hardware limit (98%).
+ *    - SOLID ORANGE: Warning - Input signal is saturated (exceeded configured scale_in_max).
+ *    - GREEN PULSE: Status - BLE Client is connected (Heartbeat every 60s).
+ *    - OFF: Normal operation in UART mode or BLE idle.
+ * 
+ * 3. High-Speed Telemetry:
+ *    - Transmits a compact string pipe format: `input:X|output:Y|command:Z|temp:T|supply:V|fault:F|sat:S|pwm_sat:P`
+ *    - `sat:1` triggers when input is saturated.
+ *    - `pwm_sat:1` triggers when the PWM duty cycle is maxed out.
+ * 
+ * 4. Secure OTA (Over-The-Air) Firmware Updates:
+ *    - Supports live firmware flashing via BLE using custom chunked transfer.
+ *    - Validates target board variants to prevent bricking (`FW_VARIANT "SERVO_EVDR"`).
+ * 
+ * ============================================================================
+ */
+
 #include <Wire.h>
 #include <Adafruit_ADS1X15.h>
 #include <Preferences.h>
@@ -41,7 +84,7 @@ inline String getDevPassword() {
 }
 #define AUTH_PASSWORD getAuthPassword()
 #define DEV_PASSWORD getDevPassword()
-#define FW_VERSION       "FINAL_BLE_UART_CODE_v1.9_ble_ota_fast"
+#define FW_VERSION       "FINAL_BLE_UART_CODE_v1.0_ble_ota_fast"
 
 
 // OTA acceptance policy for this firmware build.Change only this value when you need a different model/variant.
@@ -1797,14 +1840,15 @@ String buildTelemetryPayload() {
 
     char payload[256];
     snprintf(payload, sizeof(payload),
-        "input:%.2f|output:%.0f|command:%.0f|temp:%.1f|supply:%.1f|fault:%d|sat:%d",
+        "input:%.2f|output:%.0f|command:%.0f|temp:%.1f|supply:%.1f|fault:%d|sat:%d|pwm_sat:%d",
         runtime.inputPhysical_global,
         safeIout,
         safeIcmd,
         runtime.temperature,
         runtime.supplyVoltage,
         runtime.faultStatus ? 1 : 0,
-        (runtime.inputPhysical_global >= settings.scale_in_max) ? 1 : 0
+        (runtime.inputPhysical_global >= settings.scale_in_max) ? 1 : 0,
+        (runtime.duty_cycle >= (Constants::DUTY_MAX - 0.0001f)) ? 1 : 0
     );
 
     return String(payload);
